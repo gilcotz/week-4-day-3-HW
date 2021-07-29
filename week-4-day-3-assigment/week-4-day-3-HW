@@ -1,0 +1,90 @@
+----------------------------------------- WEEK 4 - WEDNESDAY QUESTIONS------------------------------------- 
+--1. List all customers who live in Texas (use JOINs)
+-- There are 5 customers that live in Texas
+SELECT first_name, last_name, city_id, district
+FROM customer
+join address
+On customer.address_id = address.address_id
+WHERE district = 'Texas'
+
+-- 2. Get all payments above $6.99 with the Customer's Full Name
+-- there are 1506 payments above $6.99
+SELECT first_name, last_name, amount
+FROM customer
+JOIN payment
+ON customer.customer_id = payment.customer_id
+WHERE amount > 6.99
+ORDER BY amount ASC;
+
+-- 3. Show all customers names who have made payments over $175(use subqueries)
+-- There are 6 customers that have payments over $175
+select customer_id, first_name, last_name
+from customer
+where customer_id IN(
+	select customer_id 
+	from payment
+	group by customer_id  
+	having sum(amount) > 175
+	order by sum(amount) ASC
+);
+
+-- 4. List all customers that live in Nepal (use the city table)
+-- there is only one customer that lives in Nepal
+SELECT first_name, last_name, city, country
+FROM customer
+JOIN address
+On customer.address_id = address.address_id
+JOIN city
+ON address.city_id = city.city_id
+JOIN country 
+ON city.country_id = country.country_id
+where country = 'Nepal'
+
+
+-- 5. Which staff member had the most transactions? 
+-- MIKE. HILLYER has the most TRANSACTIONS
+SELECT staff_id, first_name, Last_name
+FROM staff
+where staff_id IN(
+	SELECT COUNT(DISTINCT staff_id) -- I can add sum(amount) to show who got the most transactios
+	FROM payment
+	GROUP BY payment_id
+	ORDER BY staff_id ASC
+);
+
+-- 6. How many movies of each rating are there?
+-- PG-13: 1018, NC-17: 944, PG: 924, R: 904, G: 791
+SELECT film.rating, COUNT(film) AS film
+FROM film
+JOIN inventory
+On film.film_id = inventory.film_id
+GROUP BY rating
+ORDER BY COUNT(film.rating) DESC;
+----this is was my guidence----
+SELECT rating, COUNT(rating)
+FROM film
+GROUP BY rating
+
+
+-- 7.Show all customers who have made a single payment above $6.99 (Use Subqueries)
+-- there are 33 customers that made a single payment above $6.99
+SELECT first_name, last_name
+FROM customer
+WHERE customer_id IN(
+	SELECT COUNT(customer_id)
+	FROM payment
+	GROUP BY customer_id
+	HAVING COUNT(amount) > 6.99
+	order by COUNT(customer_id) DESC
+);
+
+-- 8. How many free rentals did our stores give away?
+-- There were 24 free rentals
+SELECT rental.rental_id, rental.staff_id, COUNT(amount) as free_movie 
+FROM rental
+JOIN payment
+On rental.rental_id = payment.rental_id
+GROUP BY rental.rental_id
+HAVING SUM(amount) = 0.00
+ORDER BY SUM(amount) DESC;
+
